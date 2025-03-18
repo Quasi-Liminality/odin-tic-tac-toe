@@ -1,0 +1,9 @@
+.board {
+    height: 65vh;
+    width: 65vh;
+    max-height: 80vw;
+    max-width: 80vw;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+}
