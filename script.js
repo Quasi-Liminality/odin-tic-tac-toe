@@ -1,36 +1,38 @@
 const GameBoard = (function () {
-    const board = [
-        [null, null, null],
-        [null, null, null],
-        [null, null, null]
-    ];
+    const board = Array(9).fill(null);
 
     const getBoard = () => board;
 
-    const updateBoard = (player, row, column) => {
-        board[row][column] = player;
+    const updateBoard = (player, index) => {
+        board[index] = player;
     };
 
     const resetBoard = () => {
-        board.forEach((row, index) => board[index].fill(null));
+        board.fill(null);
     };
 
     return { getBoard, updateBoard, resetBoard };
 })();
 
-function Player(name, marker) {   
+function Player({ name, marker }) {   
     const getName = () => name;
     const setName = (playerName) => name = playerName;
-    const getMarker = () => marker;
+    const getPlayerMarker = () => marker;
 
-    return { getName, setName, getMarker };
+    return { getName, setName, getPlayerMarker };
 }
 
 const GameController = (function () {
     const players = [
-        Player('Player One', '&#9711;'),
-        Player('Player Two', '&#10060;')
-    ];
+        Player({
+            name: 'Player One',
+            marker: '⭘'
+        }),
+        Player({
+            name: 'Player Two',
+            marker: '𝗑'
+        })
+    ]; 
 
     let activePlayer = players[0];
 
@@ -40,60 +42,57 @@ const GameController = (function () {
         activePlayer = activePlayer === players[0] ? players[1] : players[0];
     };
 
-    // Checks if the active player has won
+    // Checks if active player has won
     const checkGameWinner = () => {
         const board = GameBoard.getBoard();
-        const horizontalLines = board;
-        const diagonalLines = [
-            [board[0][0], board[1][1], board[2][2]],
-            [board[0][3], board[1][1], board[2][0]]
+        const horizontalLines = [
+            [board[0], board[1], board[2]],
+            [board[3], board[4], board[5]],
+            [board[6], board[7], board[8]]
         ];
-        const verticalLines = (() => {
-            const columns = [];
-            for (row of board) {
-                row.forEach((item, index) => {
-                    if (!columns[index]) {
-                        columns[index] = [];
-                    }
-                    columns[index].push(item);
-                });
-            }
-            return columns;
-        })();
+        const verticalLines = [
+            [board[0], board[3], board[6]],
+            [board[1], board[4], board[7]],
+            [board[2], board[5], board[8]]
+        ];
+        const diagonalLines = [
+            [board[0], board[4], board[8]],
+            [board[2], board[4], board[6]]
+        ];
 
-        let hasPlayerWon = false;
+        let playerHasWon = false;
 
         const lines = [...horizontalLines, ...diagonalLines, ...verticalLines];
 
         lines.forEach(line => {
             if (line.every(item => item === activePlayer)) {
-                return hasPlayerWon = true;
+                return playerHasWon = true;
             }
         });
 
-        return hasPlayerWon;
+        return playerHasWon;
     };
 
-    const checkGameDrawed = () => {
+    const checkGameDrew = () => {
         const board = GameBoard.getBoard();
         
-        if (!board.flat().some(item => item === null)) {
+        if (!board.some(item => item === null)) {
             return true;
         }
         return false;
     }
 
-    const playRound = (row, column) => {
+    const playRound = (cellIndex) => {
         const board = GameBoard.getBoard();
-        if (!board[row][column]) {
-            GameBoard.updateBoard(activePlayer, row, column);
+        if (!board[cellIndex]) {
+            GameBoard.updateBoard(activePlayer, cellIndex);
                       
             if (checkGameWinner()) {
                 console.log(`${activePlayer.getName()} has won!`);
                 GameBoard.resetBoard();
 
             }
-            if (checkGameDrawed()) {
+            if (checkGameDrew()) {
                 GameBoard.resetBoard();
                 
             }
@@ -105,32 +104,41 @@ const GameController = (function () {
     return { getActivePlayer, playRound, checkGameWinner };
 })();
 
-const DisplayController = (function(){
+const DisplayController = (function (){
     const boardDisplay = document.querySelector('.board');
+
+    const handleBoardClick = (e) => {
+        if (e.target.tagName === 'BUTTON') {
+            const cellIndex = e.target.dataset.index;
+
+            GameController.playRound(cellIndex);
+            console.table(GameBoard.getBoard());
+            renderGame();
+        }        
+    }
+    boardDisplay.addEventListener('click', handleBoardClick);
 
     const renderGame = () => {
         const board = GameBoard.getBoard();
         const boardCells = [];
 
-        board.forEach((row, rowIndex) => {
-            row.forEach((item, itemIndex) => {
-                let button = document.createElement('button');
-                button.dataset.row = rowIndex;
-                button.dataset.column = itemIndex;
-                if (item !== null) {
-                    button.textContent = item.getMarker();
-                }
-                boardCells.push(button);
-            } );
+        board.forEach((cell, index) => {
+            let button = document.createElement('button');
+            button.dataset.index = index;
+            if (cell !== null) {
+                button.textContent = cell.getPlayerMarker();
+            }
+            boardCells.push(button);
         });
 
         boardDisplay.replaceChildren(...boardCells);
     };
 
-    return { renderGame };
+    renderGame();
 })();
 
-DisplayController.renderGame();
+// DisplayController();
+
 
 
 // GameController.playRound(0, 0);

@@ -1,9 +1,21 @@
-.board {
-    height: 65vh;
-    width: 65vh;
-    max-height: 80vw;
-    max-width: 80vw;
+* {
+    margin: 0;
+    padding: 0;
+}
 
+body {
     display: grid;
+    justify-items: center;
+}
+
+.board {
+    display: grid;
+    width: min-content;
     grid-template-columns: 1fr 1fr 1fr;
+}
+
+button {
+    height: 14rem;
+    width: 14rem;
+    font-size: 9rem;
 }
