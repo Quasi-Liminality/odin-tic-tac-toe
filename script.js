@@ -93,7 +93,7 @@ const TicTacToe = (function() {
         };
         
         const hasGameDrew = () => {     
-            if (GameBoard.isFull()) {
+            if (!getGameWinner && GameBoard.isFull()) {
                 return 'It\s a draw!';
             }
             return false;
